@@ -11,8 +11,8 @@ class GoodRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def create(self, name: str, img: str, price: float, sale: float, stock: int) -> Optional[Good]:
-        good = Good(name=name, img=img, price=price, sale=sale, stock=stock)
+    async def create(self, name: str, img: str, price: float, discount: float, stock: int) -> Optional[Good]:
+        good = Good(name=name, img=img, price=price, discount=discount, stock=stock)
         self.session.add(good)
         await self.session.flush()
         return await self.get_by_id(good.id)

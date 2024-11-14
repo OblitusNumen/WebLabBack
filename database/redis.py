@@ -5,7 +5,7 @@ import redis.client
 
 
 class RedisDB(str, Enum):
-    basket = "basket"
+    cart = "cart"
     auth_session = "auth_session"
 
 

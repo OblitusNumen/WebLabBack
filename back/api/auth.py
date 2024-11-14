@@ -46,7 +46,22 @@ class AuthController(Controller):
         return { "message": "OK"}
 
     @post("/logout")
-    async def logout(self, response: Response, session = Cookie(), redis: redis.Redis = Depends(get_redis_client)):
+    async def logout(self, response: Response, session = Cookie(default=None), redis: redis.Redis = Depends(get_redis_client)):
         await redis.delete(f"{RedisDB.auth_session}:{session}")
         response.set_cookie("session", '', max_age=0, httponly=True)
         return { "message": "OK"}
+
+    @get("/session")
+    async def get_session(self, session: str = Cookie(default=None), redis: redis.Redis = Depends(get_redis_client)):
+        not_auth_data = GetAuthData(email="", authorized=False)
+        if session is None:
+            return not_auth_data
+        user_id = redis.get(f"{RedisDB.auth_session}:{session}")
+        if user_id is None:
+            return not_auth_data
+        user_id = user_id.decode('utf-8')
+        ur = UserRepository(self.session)
+        user = await ur.get_by_id(user_id)
+        if user is None:
+            return not_auth_data
+        return GetAuthData(email=user.email, authorized=True)
