@@ -28,7 +28,7 @@ class AuthController(Controller):
         if user is None:
             raise HTTPException(401, "Email или пароль неверны")
         session = uuid.uuid4()
-        await redis.set(f"{RedisDB.auth_session}:{session}", str(user.id), ex=SESSION_LIFETIME)
+        redis.set(f"{RedisDB.auth_session}:{session}", str(user.id), ex=SESSION_LIFETIME)
         response.set_cookie("session", str(session), max_age=SESSION_LIFETIME, httponly=True)
         return { "message": "OK"}
 
@@ -47,7 +47,7 @@ class AuthController(Controller):
 
     @post("/logout")
     async def logout(self, response: Response, session = Cookie(default=None), redis: redis.Redis = Depends(get_redis_client)):
-        await redis.delete(f"{RedisDB.auth_session}:{session}")
+        redis.delete(f"{RedisDB.auth_session}:{session}")
         response.set_cookie("session", '', max_age=0, httponly=True)
         return { "message": "OK"}
 

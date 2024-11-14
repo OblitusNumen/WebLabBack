@@ -32,12 +32,12 @@ class CatalogController(Controller):
         print("b")
         if cart is None:
             return Cart(contents=[])
-        return self.normalize_cart(Cart.model_validate_json(cart.decode('utf-8')))
+        return await self.normalize_cart(Cart.model_validate_json(cart.decode('utf-8')))
     
     @post("/updcart")
     async def update_cart(self, cart: Cart, redis: redis.Redis = Depends(get_redis_client), user: User = Depends(authorize_user)):
         await self.normalize_cart(cart)
-        await redis.set(f"{RedisDB.cart}:{user.id}", cart.model_dump_json())
+        redis.set(f"{RedisDB.cart}:{user.id}", cart.model_dump_json())
         return { "message": "OK"}
 
     async def normalize_cart(self, cart: Cart) -> Cart:
