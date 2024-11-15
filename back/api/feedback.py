@@ -18,4 +18,5 @@ class FeedbackController(Controller):
     @post("/")
     async def send_feedback(self, feedback: Feedback):
         await FeedbackRepository(self.session).create(name=feedback.name, email=feedback.email, message=feedback.msg)
+        await self.session.commit()
         return { "message": "OK"}
