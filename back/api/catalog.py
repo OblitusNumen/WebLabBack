@@ -1,15 +1,14 @@
-from locale import normalize
+import redis
 from fastapi import Depends
 from fastapi_controllers import Controller, get, post
-import redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from back.authorize_user import authorize_user
 from back.schemas.catalog import Cart
 from database.database import get_db_session
 from database.models.user import User
 from database.redis import RedisDB, get_redis_client
 from database.repositories.good_repository import GoodRepository
-from back.authorize_user import authorize_user
 
 
 class CatalogController(Controller):
