@@ -1,5 +1,5 @@
-from fastapi import Cookie, Depends, HTTPException
 import redis
+from fastapi import Cookie, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.database import get_db_session
@@ -8,7 +8,8 @@ from database.redis import RedisDB, get_redis_client
 from database.repositories.user_repository import UserRepository
 
 
-async def authorize_user(session: str = Cookie(default=None), redis: redis.Redis = Depends(get_redis_client), db_session: AsyncSession = Depends(get_db_session)) -> User:
+async def authorize_user(session: str = Cookie(default=None), redis: redis.Redis = Depends(get_redis_client),
+                         db_session: AsyncSession = Depends(get_db_session)) -> User:
     if session is None:
         raise HTTPException(status_code=401, detail="Сессия не существует или истекла")
     user_id = redis.get(f"{RedisDB.auth_session}:{session}")

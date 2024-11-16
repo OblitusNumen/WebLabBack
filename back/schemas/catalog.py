@@ -2,7 +2,9 @@ import uuid
 from typing import Any
 
 from pydantic import BaseModel
+
 from database.models.good import Good
+
 
 class Card(BaseModel):
     id: uuid.UUID
@@ -21,9 +23,11 @@ class Card(BaseModel):
         self.stock = good.stock
         self.name = good.name
 
+
 class CartItem(BaseModel):
     id: uuid.UUID
     count: int
+
 
 class Cart(BaseModel):
     contents: list[CartItem]

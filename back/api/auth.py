@@ -1,18 +1,17 @@
 import uuid
-from datetime import UTC, datetime, timedelta
-import secrets
 
-from asyncpg.protocol.protocol import Record
+import redis
 from fastapi import Cookie, Depends, HTTPException, Response
 from fastapi_controllers import Controller, get, post
 from sqlalchemy.ext.asyncio import AsyncSession
-import redis
+
+from back.schemas.auth import GetAuthData, LoginData, RegisterData
 from database.database import get_db_session
 from database.redis import RedisDB, get_redis_client
 from database.repositories.user_repository import UserRepository
-from back.schemas.auth import GetAuthData, LoginData, RegisterData
 
 SESSION_LIFETIME = 3600
+
 
 class AuthController(Controller):
     prefix = '/auth'
@@ -30,7 +29,7 @@ class AuthController(Controller):
         session = uuid.uuid4()
         redis.set(f"{RedisDB.auth_session}:{session}", str(user.id), ex=SESSION_LIFETIME)
         response.set_cookie("session", str(session), max_age=SESSION_LIFETIME, httponly=True)
-        return { "message": "OK"}
+        return {"message": "OK"}
 
     @post("/register")
     async def register(self, data: RegisterData):
@@ -43,13 +42,14 @@ class AuthController(Controller):
         user = await ur.create(data.email, data.password)
         if user is None: raise HTTPException(401, "Что-то пошло не так...")
         await self.session.commit()
-        return { "message": "OK"}
+        return {"message": "OK"}
 
     @post("/logout")
-    async def logout(self, response: Response, session = Cookie(default=None), redis: redis.Redis = Depends(get_redis_client)):
+    async def logout(self, response: Response, session=Cookie(default=None),
+                     redis: redis.Redis = Depends(get_redis_client)):
         redis.delete(f"{RedisDB.auth_session}:{session}")
         response.set_cookie("session", '', max_age=0, httponly=True)
-        return { "message": "OK"}
+        return {"message": "OK"}
 
     @get("/session")
     async def get_session(self, session: str = Cookie(default=None), redis: redis.Redis = Depends(get_redis_client)):

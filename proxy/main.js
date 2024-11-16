@@ -4,7 +4,7 @@ var http = require("http"),
 var frontProxy = new httpProxy.createProxyServer({
   target: {
     host: "localhost",
-    port: 3000,
+    port: 5173,
   },
 });
 var backProxy = new httpProxy.createProxyServer({

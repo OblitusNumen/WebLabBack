@@ -32,12 +32,13 @@ class CatalogController(Controller):
         if cart is None:
             return Cart(contents=[])
         return await self.normalize_cart(Cart.model_validate_json(cart.decode('utf-8')))
-    
+
     @post("/updcart")
-    async def update_cart(self, cart: Cart, redis: redis.Redis = Depends(get_redis_client), user: User = Depends(authorize_user)):
+    async def update_cart(self, cart: Cart, redis: redis.Redis = Depends(get_redis_client),
+                          user: User = Depends(authorize_user)):
         await self.normalize_cart(cart)
         redis.set(f"{RedisDB.cart}:{user.id}", cart.model_dump_json())
-        return { "message": "OK"}
+        return {"message": "OK"}
 
     async def normalize_cart(self, cart: Cart) -> Cart:
         goods = await GoodRepository(self.session).get_all()
@@ -46,4 +47,3 @@ class CatalogController(Controller):
                 if item.id == good.id and item.count > good.stock:
                     item.count = good.stock
         return cart
-        

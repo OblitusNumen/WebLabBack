@@ -1,5 +1,4 @@
 from fastapi import Depends
-from fastapi import Depends
 from fastapi_controllers import Controller, post
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +16,7 @@ class FeedbackController(Controller):
 
     @post("/")
     async def send_feedback(self, feedback: Feedback):
-        await FeedbackRepository(self.session).create(name=feedback.name, email=feedback.email, message=feedback.msg)
+        repo = FeedbackRepository(self.session)
+        await repo.create(name=feedback.name, email=feedback.email, message=feedback.msg)
         await self.session.commit()
-        return { "message": "OK"}
+        return {"message": "OK"}
