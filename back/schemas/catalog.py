@@ -31,3 +31,4 @@ class CartItem(BaseModel):
 
 class Cart(BaseModel):
     contents: list[CartItem]
+    discount: bool

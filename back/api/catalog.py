@@ -30,7 +30,7 @@ class CatalogController(Controller):
         cart = redis.get(f"{RedisDB.cart}:{user.id}")
         print("b")
         if cart is None:
-            return Cart(contents=[])
+            return Cart(contents=[], discount=False)
         return await self.normalize_cart(Cart.model_validate_json(cart.decode('utf-8')))
 
     @post("/updcart")
