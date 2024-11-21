@@ -40,6 +40,11 @@ class CatalogController(Controller):
         redis.set(f"{RedisDB.cart}:{user.id}", cart.model_dump_json())
         return {"message": "OK"}
 
+    @get("/getitem")
+    async def getGood(self, id: uuid.UUID):
+        good = await GoodRepository(self.session).get_by_id(id)
+        return good
+
     async def normalize_cart(self, cart: Cart) -> Cart:
         goods = await GoodRepository(self.session).get_all()
         for item in cart.contents:
