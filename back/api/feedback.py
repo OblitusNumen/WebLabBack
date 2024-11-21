@@ -20,9 +20,3 @@ class FeedbackController(Controller):
         await repo.create(name=feedback.name, email=feedback.email, message=feedback.msg)
         await self.session.commit()
         return {"message": "OK"}
-
-    @get("/all", summary="returns all feedback", description="Get feedback")
-    async def getFeedback(self):
-        repo = FeedbackRepository(self.session)
-        feedback = await repo.get_all()
-        return feedback

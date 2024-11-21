@@ -1,3 +1,5 @@
+import uuid
+
 import redis
 from fastapi import Depends
 from fastapi_controllers import Controller, get, post
@@ -41,9 +43,15 @@ class CatalogController(Controller):
         return {"message": "OK"}
 
     @get("/getitem", summary="returns good with specified id", description="Get good by id")
-    async def getGood(self, id: uuid.UUID):
+    async def get_good(self, id: uuid.UUID):
         good = await GoodRepository(self.session).get_by_id(id)
         return good
+
+    @post("/order", summary="resets cart", description="Order goods in the cart")
+    async def order(self, cart: Cart, redis: redis.Redis = Depends(get_redis_client),
+                          user: User = Depends(authorize_user)):
+        redis.delete(f"{RedisDB.cart}:{user.id}")
+        return {"message": "OK"}
 
     async def normalize_cart(self, cart: Cart) -> Cart:
         goods = await GoodRepository(self.session).get_all()
