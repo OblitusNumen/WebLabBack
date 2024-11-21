@@ -14,9 +14,15 @@ class FeedbackController(Controller):
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    @post("/")
+    @post("/", summary="saves feedback form", description="Send feedback")
     async def send_feedback(self, feedback: Feedback):
         repo = FeedbackRepository(self.session)
         await repo.create(name=feedback.name, email=feedback.email, message=feedback.msg)
         await self.session.commit()
         return {"message": "OK"}
+
+    @get("/all", summary="returns all feedback", description="Get feedback")
+    async def getFeedback(self):
+        repo = FeedbackRepository(self.session)
+        feedback = await repo.get_all()
+        return feedback
