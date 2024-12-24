@@ -20,7 +20,7 @@ class AuthController(Controller):
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    @post("/login", summary="authorizes registered user", description="Sign in")
+    @post("/login", summary="Sign in", description="Authorizes registered user")
     async def login(self, response: Response, data: LoginData, redis: redis.Redis = Depends(get_redis_client)):
         ur = UserRepository(self.session)
         user = await ur.get_by_auth(email=data.email, pw=data.password)
@@ -31,7 +31,7 @@ class AuthController(Controller):
         response.set_cookie("session", str(session), max_age=SESSION_LIFETIME, httponly=True)
         return {"message": "OK"}
 
-    @post("/register", summary="registers new user", description="Register")
+    @post("/register", summary="Register", description="Registers new user")
     async def register(self, data: RegisterData):
         ur = UserRepository(self.session)
         user = await ur.get_by_email(email=data.email)
@@ -44,14 +44,15 @@ class AuthController(Controller):
         await self.session.commit()
         return {"message": "OK"}
 
-    @post("/logout", summary="log user out", description="Log out")
+    @post("/logout", summary="Log out", description="Log user out")
     async def logout(self, response: Response, session=Cookie(default=None),
                      redis: redis.Redis = Depends(get_redis_client)):
         redis.delete(f"{RedisDB.auth_session}:{session}")
         response.set_cookie("session", '', max_age=0, httponly=True)
         return {"message": "OK"}
 
-    @get("/session", summary="returns object containing email and authorized state for client", description="get current client session")
+    @get("/session", summary="Get current client session",
+         description="Returns object containing email and authorized state for client")
     async def get_session(self, session: str = Cookie(default=None), redis: redis.Redis = Depends(get_redis_client)):
         not_auth_data = GetAuthData(email="", authorized=False)
         if session is None:

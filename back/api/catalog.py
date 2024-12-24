@@ -20,13 +20,13 @@ class CatalogController(Controller):
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    @get("/", summary="returns all goods in repository", description="Get all goods")
+    @get("/", summary="Get all goods", description="Returns all goods in repository")
     async def get_goods(self):
         goods = await GoodRepository(self.session).get_all()
         return list([{"id": good.id, "label": good.name, "price": good.price, "discount": good.discount,
                       "path_to_image": good.img, "in_stock": good.stock} for good in goods])
 
-    @get("/cart", summary="returns cart for authorized user", description="Get user's cart")
+    @get("/cart", summary="Get user's cart", description="Returns cart for authorized user")
     async def get_cart(self, redis: redis.Redis = Depends(get_redis_client), user: User = Depends(authorize_user)):
         print("a")
         cart = redis.get(f"{RedisDB.cart}:{user.id}")
@@ -35,21 +35,21 @@ class CatalogController(Controller):
             return Cart(contents=[], discount=False)
         return await self.normalize_cart(Cart.model_validate_json(cart.decode('utf-8')))
 
-    @post("/updcart", summary="validates and updates cart for authorized user", description="Update cart")
+    @post("/updcart", summary="Update cart", description="Validates and updates cart for authorized user")
     async def update_cart(self, cart: Cart, redis: redis.Redis = Depends(get_redis_client),
                           user: User = Depends(authorize_user)):
         await self.normalize_cart(cart)
         redis.set(f"{RedisDB.cart}:{user.id}", cart.model_dump_json())
         return {"message": "OK"}
 
-    @get("/getitem", summary="returns good with specified id", description="Get good by id")
+    @get("/getitem", summary="Get good by id", description="Returns good with specified id")
     async def get_good(self, id: uuid.UUID):
         good = await GoodRepository(self.session).get_by_id(id)
         return good
 
-    @post("/order", summary="resets cart", description="Order goods in the cart")
+    @post("/order", summary="Order goods in the cart", description="Resets cart")
     async def order(self, cart: Cart, redis: redis.Redis = Depends(get_redis_client),
-                          user: User = Depends(authorize_user)):
+                    user: User = Depends(authorize_user)):
         redis.delete(f"{RedisDB.cart}:{user.id}")
         return {"message": "OK"}
 
